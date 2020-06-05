@@ -1,7 +1,11 @@
 @extends('Admin.layout.app')
 
 @section('headSection')
-<link rel="stylesheet" href="{{ asset('admin/plugins/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/plugins/select2/select2.min.css') }}">
+    <script src="{{  asset('admin/ckeditor/ckeditor.js') }}"></script>
+    <meta name="connector-route" content="{{ route('ckfinder_connector') }}">
+    <meta name="browser-route" content="{{ route('ckfinder_browser') }}">
+    @include('ckfinder::setup')
 @endsection
 @section('main-content')
 <!-- Content Wrapper. Contains page content -->
@@ -89,7 +93,7 @@
 
             </div>
             <!-- /.box-body -->
-            
+
             <div class="box">
              <div class="box-header">
                <h3 class="box-title">Write Article Body Here
@@ -116,7 +120,7 @@
         </div>
         <!-- /.box -->
 
-        
+
       </div>
       <!-- /.col-->
     </div>
@@ -128,13 +132,27 @@
 @endsection
 @section('footerSection')
 <script src="{{ asset('admin/plugins/select2/select2.full.min.js') }}"></script>
-<script src="{{  asset('admin/ckeditor/ckeditor.js') }}"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
     $(function () {
+        function getMeta(metaName) {
+            const metas = document.getElementsByTagName('meta');
+            for (let i = 0; i < metas.length; i++) {
+                if (metas[i].getAttribute('name') === metaName) {
+                    return metas[i].getAttribute('content');
+                }
+            }
+            return '';
+        }
       // Replace the <textarea id="editor1"> with a CKEditor
       // instance, using default configuration.
-      CKEDITOR.replace('editor1');
+        CKEDITOR.replace('editor1', {
+            extraPlugins: 'devtools',
+            // Use named CKFinder browser route
+            filebrowserBrowseUrl: getMeta('browser-route'),
+            // Use named CKFinder connector route
+            filebrowserUploadUrl: `${getMeta('connector-route')}?command=QuickUpload&type=Files`
+        });
     });
 </script>
 <script>
@@ -176,7 +194,7 @@
                         let sampleHtm = CKEDITOR.dom.element.createFromHtml(`<p><iframe class="gde-frame test" scrolling="no" src="https://tripleoklaw.com/pdfjs/web/viewer.html?file=${item}" style="width:100%; height:500px; border: none;"></iframe></p>`);
                         CKEDITOR.instances.editor1.insertElement(sampleHtm);
                     });
-                } 
+                }
                 if(res.status === 422) {
                     console.log('res error');
                 }
